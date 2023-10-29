@@ -1,0 +1,71 @@
+#loading the opportunity atlas for texas
+library(dplyr)
+library(tidyverse)
+atlas <- readRDS(gzcon(url("https://raw.githubusercontent.com/jrm87/ECO3253_fall2023/master/data/atlas.rds")))
+#subsetting for texas
+texas_tracts <- atlas%>%
+  filter(state==48)
+#subsetting for bexar county
+bexarcounty_tracts <- atlas%>%
+  filter(state==48, county ==029)
+
+#import SDGR database to map school districts to census tracts
+library(readxl)
+grf17_lea_tract <- read_excel("grf17_lea_tract.xlsx")
+View(grf17_lea_tract)
+
+#need to map school districts to census tracks
+#join these? how does one join in R
+
+typeof(texas_tracts$state)
+typeof(texas_tracts$county)
+typeof(texas_tracts$tract)
+
+class(texas_tracts$state)
+class(texas_tracts$county)
+class(texas_tracts$tract)
+
+transform(texas_tracts, texas_tracts$state = as.character(texas_tracts$state))
+transform(texas_tracts, state = as.character(state))
+class(texas_tracts$state)
+
+as.character(texas_tracts$county)
+as.character(texas_tracts$tract)
+#create new variable in texas_tracts for full census tract number
+texas_tracts1 <- texas_tracts %>% 
+  transform(texas_tracts, state = as.integer(state))%>%
+  transform(texas_tracts, county = as.integer(county))%>%
+  transform(texas_tracts, tract = as.integer(tract))
+
+texas_tracts2 <- texas_tracts1 %>% 
+  transform(texas_tracts1, state = as.character(state))%>%
+  transform(texas_tracts1, county = as.character(county))%>%
+  transform(texas_tracts1, tract = as.character(tract))
+
+#pipe just the vector texas_tracts3$county in console to debug
+
+texas_tracts3 <- texas_tracts2%>%
+  mutate(charlengthcounty = str_length(texas_tracts2$county))
+
+texas_tracts3 <- texas_tracts3%>%
+mutate(countyf = case_when(charlengthcounty > 3 ~ (paste(rep("0", 3-charlengthcounty)))))
+
+texas_tracts2 <- texas_tracts1 %>% 
+  transform(texas_tracts, state = as.character(state))%>%
+  transform(texas_tracts, county = as.character(county))%>%
+  transform(texas_tracts, tract = as.character(tract))%>%
+  mutate(ftract= paste(state, county, tract, sep="")) 
+#ask mentors how to address issue where tract and county are 6 and 3 digit
+#numerics but 0s are left out here
+#can add an if statement where if county is 2 digits, add zero to the front, if
+#its 1 add 2 zeros to the front, and same for tract
+
+#add small aside to the slides
+
+View(atlas)
+#use mutate function to add variable that adds state, county, and tract number 
+#together so i can do join
+#problem is, county removes unnecessary 0s but its meant to be three digits
+
+# left join in R using left_join() function 
+oaschooldistricts= texas_tracts1 %>% left_join(grf17_lea_tract,by=texas_tracts1$ftract)

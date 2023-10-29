@@ -1,0 +1,13 @@
+#This is an example of how to manipulate the date. Creates New Column with tital enrollment and selects only SCH_Grade_G10-12
+
+CREATE TABLE testing AS
+SELECT SCH_GRADE_G10, SCH_GRADE_G11, SCH_GRADE_G12, school_characteristics.COMBOKEY, school_characteristics.LEAID, advanced_placement.TOT_APENR_M, advanced_placement.TOT_APENR_F, (advanced_placement.TOT_APENR_M + advanced_placement.TOT_APENR_F) AS TOT_APENR 
+FROM school_characteristics
+INNER JOIN advanced_placement ON school_characteristics.COMBOKEY = advanced_placement.COMBOKEY
+WHERE SCH_GRADE_G10 = 'Yes' OR SCH_GRADE_G11 = 'Yes' OR SCH_GRADE_G11 = 'Yes';
+
+#THIS PART is an example of how to sum and group the data by LEAID
+
+SELECT LEAID, SUM(TOT_APENR) AS TOT_APENR_LEAD
+FROM testing
+GROUP BY leaid;
